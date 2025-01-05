@@ -1,84 +1,58 @@
 import wpilib
+import wpimath
 import wpilib.drive
-import wpilib.shuffleboard
-from wpimath.geometry import Rotation2d
-from wpimath.kinematics import ChassisSpeeds
+import wpimath.filter
+import wpimath.controller
+import drivetrain
 
-from robotcontainer import RobotContainer
-
-class State():
-    def __init__(self, state: str):
-        self.state = state
-        pass
-
-    def changeState(self, state: str):
-        self.state = state
-
-    def getState(self):
-        return self.state
 
 class MyRobot(wpilib.TimedRobot):
+    def robotInit(self) -> None:
+        """Robot initialization function"""
+        self.controller = wpilib.XboxController(0)
+        self.swerve = drivetrain.Drivetrain()
 
-    def __init__(self):
-        super().__init__()
-        self.joystick = wpilib.Joystick(0)
-        board = wpilib.shuffleboard.Shuffleboard
-        self.state = State('Disabled')
+        # Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
+        self.xspeedLimiter = wpimath.filter.SlewRateLimiter(3)
+        self.yspeedLimiter = wpimath.filter.SlewRateLimiter(3)
+        self.rotLimiter = wpimath.filter.SlewRateLimiter(3)
 
-    def disabledPeriodic(self):
-        pass
+    def autonomousPeriodic(self) -> None:
+        self.driveWithJoystick(False)
+        self.swerve.updateOdometry()
 
-    def robotInit(self):
+    def teleopPeriodic(self) -> None:
+        self.driveWithJoystick(True)
 
-        self.robotContainer = RobotContainer()
-        self.drivetrain = self.robotContainer.drivetrain
+    def driveWithJoystick(self, fieldRelative: bool) -> None:
+        # Get the x speed. We are inverting this because Xbox controllers return
+        # negative values when we push forward.
+        xSpeed = (
+            -self.xspeedLimiter.calculate(
+                wpimath.applyDeadband(self.controller.getLeftY(), 0.02)
+            )
+            * drivetrain.kMaxSpeed
+        )
 
-        self.drivetrain.gyro.zeroYaw()
+        # Get the y speed or sideways/strafe speed. We are inverting this because
+        # we want a positive value when we pull to the left. Xbox controllers
+        # return positive values when you pull to the right by default.
+        ySpeed = (
+            -self.yspeedLimiter.calculate(
+                wpimath.applyDeadband(self.controller.getLeftX(), 0.02)
+            )
+            * drivetrain.kMaxSpeed
+        )
 
-    def teleopInit(self):
-        self.drivetrain.gyro.zeroYaw()
+        # Get the rate of angular rotation. We are inverting this because we want a
+        # positive value when we pull to the left (remember, CCW is positive in
+        # mathematics). Xbox controllers return positive values when you pull to
+        # the right by default.
+        rot = (
+            -self.rotLimiter.calculate(
+                wpimath.applyDeadband(self.controller.getRightX(), 0.02)
+            )
+            * drivetrain.kMaxSpeed
+        )
 
-        self.slow = 1
-
-    def teleopPeriodic(self):
-        xspeed = self.driver1.getX()
-        yspeed = self.driver1.getY()
-
-        if self.driver1.getRawButtonPressed(2):
-            self.drivetrain.gyro.zeroYaw()
-
-        if self.driver1.getTrigger():
-            tspeed = self.driver1.getZ()
-        else:
-            tspeed = 0
-
-        if xspeed == 0 and yspeed == 0 and tspeed == 0:
-            self.drivetrain.frontLeftDrive.set(0)
-            self.drivetrain.backRightDrive.set(0)
-            self.drivetrain.backLeftDrive.set(0)
-            self.drivetrain.frontRightDrive.set(0)
-
-            self.drivetrain.backLeftRotation.set(0)
-            self.drivetrain.backRightRotation.set(0)
-            self.drivetrain.frontLeftRotation.set(0)
-            self.drivetrain.frontRightRotation.set(0)
-
-        speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow, tspeed * 0.8,
-                                                       Rotation2d().fromDegrees(
-                                                           self.yaw))
-        self.drivetrain.driveFromChassisSpeeds(speeds)
-
-        print(self.drivetrain.odometry.getPose())
-
-    def testInit(self):
-        pass
-
-    def testPeriodic(self):
-        print(self.drivetrain.odomerty.getPose())
-        pass
-
-    def robotPeriodic(self):
-        self.yaw = -self.drivetrain.gyro.getAngle()
-
-if __name__ == "__main__":
-    wpilib.run(MyRobot)
+        self.swerve.drive(xSpeed, ySpeed, rot, fieldRelative, self.getPeriod())
