@@ -11,7 +11,7 @@ ker = 4096 #kEncoderResolution
 kmmav = math.pi #kModuleAngularVelocity
 kmmaa = math.tau #kModuleMaxAngularAcceleration
 
-class SwerevModule:
+class SwerveModule:
     def __init__(
             self,
             driveMotorChannel: int,
@@ -27,43 +27,52 @@ class SwerevModule:
         self.de = wpilib.Encoder(driveEncoderChannelA, driveEncoderChannelB)
         self.te = wpilib.Encoder(turningEncoderChannelA, turningEncoderChannelB)
 
-        self.drivePIDController = wpimath.controller.ProfilePIDControler(
+        self.drivePIDContoller = wpimath.controller.PIDController(1, 0, 0)
+
+        self.turningPIDController = wpimath.controller.ProfiledPIDController(
             1,
             0,
             0,
-            wpimath.trajectory.TrapezoidProfile.Constrains(
+            wpimath.trajectory.TrapezoidProfile.Constraints(
                 kmmav,
                 kmmaa,
             ),
         )
 
-        self.driveFeedforware = wpimath.controller.SimpleMotorFeedforwardMeters(1, 3)
+        self.driveFeedforward = wpimath.controller.SimpleMotorFeedforwardMeters(1, 3)
         self.turnFeedforward = wpimath.controller.SimpleMotorFeedforwardMeters(1, 0.5)
 
-        self.driveEncoder.setDistancePerPulse(math.tau * kwr / ker)
+        self.de.setDistancePerPulse(math.tau * kwr / ker)
 
-        self.turningEncoder.setDistancePerPulse(math.tau / ker)
+        self.te.setDistancePerPulse(math.tau / ker)
 
-        self.turningPIDController.enableContinuoudInput(-math.pi, math.pi)
+        self.turningPIDController.enableContinuousInput(-math.pi, math.pi)
 
     def getState(self) -> wpimath.kinematics.SwerveModuleState:
         return wpimath.kinematics.SwerveModulestate(
-            self.driveEncoder.getDistance(),
-            wpimath.geometry.rotation2d(self.turningEncoder.getDistance()),
+            self.de.getDistance(),
+            wpimath.geometry.rotation2d(self.te.getDistance()),
+        )
+
+
+    def getPosition(self) -> wpimath.kinematics.SwerveModulePosition:
+        return wpimath.kinematics.SwerveModulePosition(
+            self.de.getDistance(),
+            wpimath.geometry.Rotation2d(self.te.getDistance()),
         )
 
     def SetDesiredState(
             self, desiredState: wpimath.kinematics.SwerveModuleState
     ) -> None:
 
-        encoderRotation = wpimath.geometry.Rotation2d(self.turningEncoder.getDistance())
+        encoderRotation = wpimath.geometry.Rotation2d(self.te.getDistance())
 
         desiredState.optimeize(encoderRotation)
 
         desiredState.cosineScale(encoderRotation)
 
         driveOutput = self.drivePIDController.calulate(
-            self.driveEncoder.getRate(), desiredState.speed
+            self.de.getRate(), desiredState.speed
         )
 
         driveFeedforward = self.driveFeedForward.calculate(desiredState.speed)

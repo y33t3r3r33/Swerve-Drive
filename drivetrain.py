@@ -10,26 +10,29 @@ kMAS = math.pi #kMaxAngleSpeed
 class Drivetrain:
 
     def __init__(self) -> None:
+
+        #Locations
         self.fll = wpimath.geometry.Translation2d(0.381, 0.381) #temp values
         self.frl = wpimath.geometry.Translation2d(0.381, -0.381) #temp values
-        self.bll = wpimath.geomtery.Translation2d(-0.381, 0.381) #temp values
+        self.bll = wpimath.geometry.Translation2d(-0.381, 0.381) #temp values
         self.brl = wpimath.geometry.Translation2d(-0.381, -0.381) #temp values
 
+        #Motors
         self.fl = swervemodule.SwerveModule(1, 2, 0, 1, 2, 3)
         self.fr = swervemodule.SwerveModule(3, 4, 4, 5, 6, 7)
-        self.bl = swervemodule.SwerveModule(6, 6, 8, 9, 10, 11)
+        self.bl = swervemodule.SwerveModule(5, 6, 8, 9, 10, 11)
         self.br = swervemodule.SwerveModule(7, 8, 12, 13, 14, 15)
 
         self.gyro = wpilib.AnalogGyro(0)
 
-        self.kinematics = wpilib.kinematics.SwerveDrive4Kinematics(
+        self.kinematics = wpimath.kinematics.SwerveDrive4Kinematics(
             self.fll,
             self.frl,
             self.bll,
             self.brl,
         )
 
-        self.odometry = wpilib.kinematics.SwerveDive4Odometry(
+        self.odometry = wpimath.kinematics.SwerveDrive4Odometry(
             self.kinematics,
             self.gyro.getRotation2d(),
             (

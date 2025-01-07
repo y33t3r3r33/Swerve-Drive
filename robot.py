@@ -9,7 +9,7 @@ import drivetrain
 class MyRobot(wpilib.TimedRobot):
     def robotInit(self) -> None:
         self.controller = wpilib.XboxController(0)
-        self.swerve = drivetrain.DriveTrain()
+        self.swerve = drivetrain.Drivetrain()
 
         self.xsl = wpimath.filter.SlewRateLimiter(3) #x speed limiter
         self.ysl = wpimath.filter.SlewRateLimiter(3) #y rate limiter
