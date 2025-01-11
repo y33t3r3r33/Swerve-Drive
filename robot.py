@@ -5,39 +5,30 @@ import wpimath.filter
 import wpimath.controller
 import drivetrain
 
+from wpimath.kinematics import ChassisSpeeds
+from wpimath.geometry import Rotation2d
+
 
 class MyRobot(wpilib.TimedRobot):
     def robotInit(self) -> None:
-        self.controller = wpilib.XboxController(0)
+        self.driver1 = wpilib.XboxController(0)
         self.swerve = drivetrain.Drivetrain()
 
         self.xsl = wpimath.filter.SlewRateLimiter(3) #x speed limiter
         self.ysl = wpimath.filter.SlewRateLimiter(3) #y rate limiter
         self.rl = wpimath.filter.SlewRateLimiter(3) #rot limiter
 
-    def teleopPeriodic(self) -> None:
-        self.driveWithJoystick(True)
 
-    def driveWithJoystick(self, fieldRelative: bool):
-        xSpeed = (
-            -self.xsl.calculate(
-                wpimath.applyDeadband(self.controller.getLeftY(), 0.02)
-            )
-            * drivetrain.kMaxSpeed
-        )
+    def disabledInit(self):
+        pass
 
-        ySpeed = (
-            -self.ysl.calculate(
-                wpimath.applyDeadband(self.controller.getLeftX(), 0.02)
-            )
-            * drivetrain.kMaxSpeed
-        )
+    def teleopInit(self):
+        self.slow = 1
 
-        rot = (
-            -self.rl.calculate(
-                wpimath.applyDeadband(self.controller.getRightX(), 0.02)
-            )
-            * drivetrain.kMaxSpeed
-        )
+    def teleopPeriodic(self):
+        xspeed = self.driver1.getRightX()
+        yspeed = self.driver1.getRightY()
 
-        self.swerve.drive(xSpeed, ySpeed, rot, fieldRelative, self.getPeriod())
+        speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow,
+                                                       Rotation2d().fromDegrees(
+                                                           self.yaw))
