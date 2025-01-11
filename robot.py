@@ -12,7 +12,7 @@ from wpimath.geometry import Rotation2d
 class MyRobot(wpilib.TimedRobot):
     def robotInit(self) -> None:
         self.driver1 = wpilib.XboxController(0)
-        self.swerve = drivetrain.Drivetrain()
+        self.swerve = drivetrain.DriveTrain()
 
         self.xsl = wpimath.filter.SlewRateLimiter(3) #x speed limiter
         self.ysl = wpimath.filter.SlewRateLimiter(3) #y rate limiter
