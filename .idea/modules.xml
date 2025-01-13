@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../8788_Crescendo/.idea/2024-Ballistabots-Crescendo.iml" filepath="$PROJECT_DIR$/../../8788_Crescendo/.idea/2024-Ballistabots-Crescendo.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/PythonProject5.iml" filepath="$PROJECT_DIR$/.idea/PythonProject5.iml" />
     </modules>
   </component>
