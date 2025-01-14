@@ -106,6 +106,54 @@ class Drivetrain():
          wpimath.geometry.Rotation2d().fromDegrees(self.gyro.getYaw())
          ,
          (
-            getswervemodpos(self.blenc, self.bldenc) 
+            getswervesodpos(self.blenc, self.bldenc),
+            getswervepodpos(self.brenc, self.brdenc),
+            getswervemodpos(self.flenc, self.fldenc),
+            getswervemodpos(self.frenc, self.frdenc),
+         ),
+         Pose2d(0, 0, Rotation2d().fromDegrees(0))
+      )
+
+      print("End of init")
+
+   def getAutoComm(self):
+      print("getautcommand")
+
+   def shouldFlipPath(self):
+      pass
+
+   def getGyro(self):
+      return -self.gyro.getAngle()
+
+   def getChassisSpeed(self) -> ChassisSpeeds:
+      print(f"{self.lcs=}")
+      return self.lcs
+
+   def updateodo(self) -> None:
+      self.odo.update(
+         wpimath.geometry.Rotation2d(self.gyro.getYaw())
+         ,
+         (
+            getswervemodpos(self.blenc, self.bldenc),
+            getswervemodpos(self.brenc, self.brdenc),
+            getswervemodpos(self.flenc, self.fldenc),
+            getswervemodpos(self.frenc, self.frdenc),
          )
       )
+
+   def periodic(self) -> None:
+      self.updateodo()
+
+   def testDrive(self, speeds: ChassisSpeeds):
+      print("TEST DRIVE MODE")
+      print(speeds)
+
+   def testGetPose(self) -> Pose2d:
+      print("TEST GET POSE")
+      return Pose2d()
+
+   def angleToEncTics(self, angle: float):
+      return self.scale_number(angle, 0, 360, -0.5, 0.99973)
+
+   def scale_number(self, unscaled, tomin, tomax, frommin, frommax):
+      return (tomax - tomin) * (unscaled - frommin) / (frommax - frommin) + tomin
