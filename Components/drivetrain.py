@@ -92,7 +92,7 @@ class Drivetrain():
       self.fldpid = controller.PIDController(dkp, dki, dkd,
                                              wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
 
-      self.gyro = navx.AHRS.create_spi(wpilib.SPI.port.kMXP)
+      self.gyro = navx.AHRS.create_spi(wpilib.kI2C.port.kMXP)
 
       self.gyro.enableLogging(True)
 

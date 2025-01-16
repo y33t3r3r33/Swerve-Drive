@@ -3,7 +3,8 @@ import wpimath
 import wpilib.drive
 import wpimath.filter
 import wpimath.controller
-import Components.drivetrain
+from robotcontainer import RobotContainer
+from Components import drivetrain
 
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Rotation2d
@@ -41,8 +42,8 @@ class MyRobot(wpilib.TimedRobot):
             xspeed = self.driver1.getLeftX() * 0.1
             yspeed = self.driver1.getLeftY() * 0.1
 
-            speeds = ChassisSpeeds.fromRobotRelativeSpeeds(xspeed, yspeed, 0, Rotation2d().fromDegrees(0))
-            # speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow,
-            #                                               Rotation2d().fromDegrees(
-            #                                                     self.yaw))
+            #speeds = ChassisSpeeds.fromRobotRelativeSpeeds(xspeed, yspeed, 0, Rotation2d().fromDegrees(0))
+            speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow,
+                                                          Rotation2d().fromDegrees(
+                                                             self.yaw))
             self.swerve.driveFromChassisSpeeds(speeds)
