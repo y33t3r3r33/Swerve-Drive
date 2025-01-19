@@ -6,6 +6,7 @@ import phoenix6 as ctre
 import rev
 import wpilib
 import wpimath
+from navx import AHRS
 from wpimath import controller
 from wpimath import trajectory
 from wpimath.geometry import Translation2d, Rotation2d, Pose2d
@@ -77,22 +78,22 @@ class Drivetrain():
 
       self.rrpid = controller.PIDController(0.001, 0, 0)
 
-      dkp = 0.005
-      dki = 0.01
-      dkd = 0.01
+      dkp = 0.01
+      dki = 0.0
+      dkd = 0.0
 
-      self.bldpid = controller.PIDController(dkp, dki, dkd,
-                                             wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
-      self.brdpid = controller.PIDController(dkp, dki, dkd,
-                                             wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
-      self.fldpid = controller.PIDController(dkp, dki, dkd,
-                                             wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
-      self.frdpid = controller.PIDController(dkp, dki, dkd,
-                                             wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
-      self.fldpid = controller.PIDController(dkp, dki, dkd,
-                                             wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
+      self.bldpid = controller.ProfiledPIDController(dkp, dki, dkd,
+                                              wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
+      self.brdpid = controller.ProfiledPIDController(dkp, dki, dkd,
+                                              wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
+      self.fldpid = controller.ProfiledPIDController(dkp, dki, dkd,
+                                              wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
+      self.frdpid = controller.ProfiledPIDController(dkp, dki, dkd,
+                                              wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
+      self.fldpid = controller.ProfiledPIDController(dkp, dki, dkd,
+                                              wpimath.trajectory.TrapezoidProfile.Constraints(3, 10))
 
-      self.gyro = navx.AHRS.create_spi(wpilib.kI2C.port.kMXP)
+      self.gyro = navx.AHRS.create_spi()
 
       self.gyro.enableLogging(True)
 
@@ -101,15 +102,19 @@ class Drivetrain():
       fll = Translation2d(-.5, -.5)
       frl = Translation2d(-.5, .5)
 
-      self.kinematics = SwerveDrive4Odometry()(
+      self.kinematics = SwerveDrive4Kinematics(
+         fll, frl, bll, brl
+      )
+
+      self.odo = SwerveDrive4Odometry(
          self.kinematics,
          wpimath.geometry.Rotation2d().fromDegrees(self.gyro.getYaw())
          ,
          (
-            getswervesodpos(self.blenc, self.bldenc),
-            getswervepodpos(self.brenc, self.brdenc),
-            getswervemodpos(self.flenc, self.fldenc),
             getswervemodpos(self.frenc, self.frdenc),
+            getswervemodpos(self.flenc, self.fldenc),
+            getswervemodpos(self.brenc, self.brdenc),
+            getswervemodpos(self.blenc, self.bldenc)
          ),
          Pose2d(0, 0, Rotation2d().fromDegrees(0))
       )
@@ -131,8 +136,7 @@ class Drivetrain():
 
    def updateodo(self) -> None:
       self.odo.update(
-         wpimath.geometry.Rotation2d(self.gyro.getYaw())
-         ,
+          wpimath.geometry.Rotation2d(self.gyro.getYaw())
          (
             getswervemodpos(self.blenc, self.bldenc),
             getswervemodpos(self.brenc, self.brdenc),
@@ -157,3 +161,91 @@ class Drivetrain():
 
    def scale_number(self, unscaled, tomin, tomax, frommin, frommax):
       return (tomax - tomin) * (unscaled - frommin) / (frommax - frommin) + tomin
+
+   def scale_number(self, unscaled, to_min, to_max, from_min, from_max):
+      """
+      scales numbers using some cool math with other stuff
+
+      """
+      return (to_max - to_min) * (unscaled - from_min) / (from_max - from_min) + to_min
+
+   def TurnSwivelPos(self):
+
+      newAngle = self.angleToEncTics(45)
+
+      FLnewState = self.optimize(0, newAngle, self.flenc.get_absolute_position().value)
+      FRnewState = self.optimize(0, 360 - newAngle, self.frenc.get_absolute_position().value)
+      BLnewState = self.optimize(0, 360 - newAngle, self.blenc.get_absolute_position().value)
+      BRnewState = self.optimize(0, newAngle, self.brenc.get_absolute_position().value)
+
+      FLnewSteerAngle = FLnewState[1]
+      FRnewSteerAngle = FRnewState[1]
+      BLnewSteerAngle = BLnewState[1]
+      BRnewSteerAngle = BRnewState[1]
+
+      FLOutput = self.flpid.calculate(self.flenc.get_absolute_position().value, FLnewSteerAngle)
+      FROutput = self.frpid.calculate(self.frenc.get_absolute_position().value, FRnewSteerAngle)
+      BLOutput = self.blpid.calculate(self.blenc.get_absolute_position().value, BLnewSteerAngle)
+      BROutput = self.brpid.calculate(self.brenc.get_absolute_position().value, BRnewSteerAngle)
+
+      self.flr.set(FLOutput)
+      self.frr.set(FROutput)
+      self.blr.set(BLOutput)
+      self.brr.set(BROutput)
+
+   def optimize(self, drive_voltage, steer_angle, current_angle):
+      delta = steer_angle - current_angle
+
+      if abs(delta) > math.pi / 2.0 and abs(delta) < 3.0 / 2.0 * math.pi:
+         if steer_angle >= math.pi:
+            return (-drive_voltage, steer_angle - math.pi)
+         else:
+            return (-drive_voltage, steer_angle + math.pi)
+      else:
+         return (drive_voltage, steer_angle)
+
+   def driveFromChassisSpeeds(self, speeds: ChassisSpeeds) -> None:
+      self.lastChassisSpeed = speeds
+      frontLeft, frontRight, backLeft, backRight = self.kinematics.toSwerveModuleStates(speeds)
+
+      frontLeftOptimized = SwerveModuleState.optimize(frontLeft,
+                                                      Rotation2d(
+                                                         ticks2rad(self.flenc.get_absolute_position()._value)))
+      frontRightOptimized = SwerveModuleState.optimize(frontRight,
+                                                       Rotation2d(
+                                                          ticks2rad(self.Frenc.get_absolute_position()._value)))
+      backLeftOptimized = SwerveModuleState.optimize(backLeft,
+                                                     Rotation2d(
+                                                        ticks2rad(self.blenc.get_absolute_position()._value)))
+      backRightOptimized = SwerveModuleState.optimize(backRight,
+                                                      Rotation2d(
+                                                         ticks2rad(self.brenc.get_absolute_position()._value)))
+
+      self.blr.set(-self.blpid.calculate(self.blenc.get_absolute_position()._value,
+                                                         lrat(backLeftOptimized.angle.radians())))
+      self.flr.set(self.flpid.calculate(self.flenc.get_absolute_position()._value,
+                                                         lrat(frontLeftOptimized.angle.radians())))
+      self.brr.set(-self.brpid.calculate(self.brenc.get_absolute_position()._value,
+                                                           lrat(backRightOptimized.angle.radians())))
+      self.frr.set(-self.frpid.calculate(self.frenc.get_absolute_position()._value,
+                                                            lrat(frontRightOptimized.angle.radians())))
+
+      self.bld.set(-backLeftOptimized.speed)
+      self.brd.set(backRightOptimized.speed)
+      self.fld.set(frontLeftOptimized.speed)
+      self.frd.set(frontRightOptimized.speed)
+
+      self.updateodo()
+
+   # def align(self):
+   #    results = self.Eyes.getResults()
+   #    if results.hasTargets():
+   #       for i in results.getTargets():
+   #          if i.getFiducialId() == 7 or i.getFiducialId() == 3:
+   #             self.yaw = i.getYaw()
+   #          else:
+   #             return 0
+   # 
+   #       return self.robotRotPID.calculate(Rotation2d.fromDegrees(self.gyro.getAngle()).degrees(), self.yaw)
+   #    else:
+   #       return 0

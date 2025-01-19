@@ -42,7 +42,7 @@ class SwerveModule:
     def getdriveencpose(self):
         return self.dmenc.getPosition()
 
-    def getswervemodpose(self) -> SwerveModulePosition:
+    def getSwerveModPose(self) -> SwerveModulePosition:
         return SwerveModulePosition(
             self.getdriveencpose(),
             Rotation2d(self.ticks2rad(self.getrotencposeasdouble()))
