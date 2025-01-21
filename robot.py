@@ -4,7 +4,6 @@ import wpilib.drive
 import wpimath.filter
 import wpimath.controller
 from robotcontainer import RobotContainer
-from Components import drivetrain
 
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Rotation2d
@@ -25,25 +24,78 @@ class MyRobot(wpilib.TimedRobot):
 
     def __init__(self):
         super().__init__()
+        self.robotcontainer = RobotContainer()
         self.driver1 = wpilib.XboxController(0)
-        self.swerve = drivetrain.Drivetrain()
+        self.driver2 = wpilib.XboxController(1)
+        # self.swerve = drivetrain.Drivetrain()
+
+        self.state = State("disabled")
 
         self.xsl = wpimath.filter.SlewRateLimiter(3)  # x speed limiter
         self.ysl = wpimath.filter.SlewRateLimiter(3)  # y rate limiter
         self.rl = wpimath.filter.SlewRateLimiter(3)  # rot limiter
 
-        def disabledInit(self):
-            pass
+    def disable(self):
+        pass
 
-        def teleopInit(self):
-            self.slow = 1
+    def robot(self):
+        self.robotcontainer = RobotContainer()
+        self.drivetrain = self.robotcontainer.drivetrain
 
-        def teleopPeriodic(self):
-            xspeed = self.driver1.getLeftX() * 0.1
-            yspeed = self.driver1.getLeftY() * 0.1
+        self.blr = self.robotcontainer.drivetrain.blr
+        self.brr = self.robotcontainer.drivetrain.brr
+        self.flr = self.robotcontainer.drivetrain.flr
+        self.frr = self.robotcontainer.drivetrain.frr
 
-            #speeds = ChassisSpeeds.fromRobotRelativeSpeeds(xspeed, yspeed, 0, Rotation2d().fromDegrees(0))
-            speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow,
-                                                          Rotation2d().fromDegrees(
-                                                             self.yaw))
-            self.swerve.driveFromChassisSpeeds(speeds)
+        self.blpid = self.robotcontainer.drivetrain.blpid
+        self.brpid = self.robotcontainer.drivetrain.brpid
+        self.flpid = self.robotcontainer.drivetrain.flpid
+        self.frpid = self.robotcontainer.drivetrain.frpid
+
+        self.blenc = self.robotcontainer.drivetrain.blenc
+        self.brenc = self.robotcontainer.drivetrain.brenc
+        self.flenc = self.robotcontainer.drivetrain.flenc
+        self.frenc = self.robotcontainer.drivetrain.frenc
+
+        self.drivetrain.gyro.zeroYaw()
+
+    def teleopInit(self):
+        self.slow = 1
+
+    def teleopPeriodic(self):
+        xspeed = self.driver1.getRightX()
+        yspeed = self.driver1.getRightX()
+
+        if self.driver1.B():
+            self.drivetrain.gyro.zeroYaw()
+        else:
+            tspeed = 0
+
+        if abs(xspeed) < .15:  # applies  a deadzone to the joystick
+            xspeed = 0
+        if abs(yspeed) < .2:
+            yspeed = 0
+
+        if self.driver1.A():
+            tspeed = self.driver1.getLeftX()
+        else:
+            tspeed = 0
+
+        if xspeed == 0 and yspeed == 0 and tspeed == 0:  # if no speed is given to the motors there will be no power in any of the motors
+            self.drivetrain.fld.set(0)
+            self.drivetrain.brd.set(0)
+            self.drivetrain.bld.set(0)
+            self.drivetrain.frd.set(0)
+
+            self.drivetrain.blr.set(0)
+            self.drivetrain.brr.set(0)
+            self.drivetrain.flr.set(0)
+            self.drivetrain.frr.set(0)
+
+        speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow, -tspeed * 0.8,
+                                                       Rotation2d().fromDegrees(
+                                                           self.yaw))
+
+        self.drivetrain.driveFromChassisSpeeds(speeds)
+
+        print(self.drivetrain.odometry.getPose())
