@@ -22,9 +22,9 @@ class State():
 
 class MyRobot(wpilib.TimedRobot):
 
-    def __init__(self):
+    def robotInit(self) -> None:
         super().__init__()
-        self.robotcontainer = RobotContainer()
+        # self.robotcontainer = RobotContainer()
         self.driver1 = wpilib.XboxController(0)
         self.driver2 = wpilib.XboxController(1)
         # self.swerve = drivetrain.Drivetrain()
@@ -39,8 +39,8 @@ class MyRobot(wpilib.TimedRobot):
         pass
 
     def robot(self):
-        self.robotcontainer = RobotContainer()
-        self.drivetrain = self.robotcontainer.drivetrain
+        # self.robotcontainer = RobotContainer()
+        # self.drivetrain = self.robotcontainer.drivetrain
 
         self.blr = self.robotcontainer.drivetrain.blr
         self.brr = self.robotcontainer.drivetrain.brr
@@ -63,38 +63,41 @@ class MyRobot(wpilib.TimedRobot):
         self.slow = 1
 
     def teleopPeriodic(self):
+        self.robotcontainer = RobotContainer()
+        self.drivetrain = self.robotcontainer.drivetrain
         xspeed = self.driver1.getRightX()
         yspeed = self.driver1.getRightX()
+        tspeed = self.driver1.getRightX()
 
-        if self.driver1.B():
-            self.drivetrain.gyro.zeroYaw()
-        else:
-            tspeed = 0
+        # if self.driver1.B():
+        #     self.drivetrain.gyro.zeroYaw()
+        # else:
+        #     tspeed = 0
 
         if abs(xspeed) < .15:  # applies  a deadzone to the joystick
             xspeed = 0
         if abs(yspeed) < .2:
             yspeed = 0
 
-        if self.driver1.A():
-            tspeed = self.driver1.getLeftX()
-        else:
-            tspeed = 0
+        # if self.driver1.A():
+        #     tspeed = self.driver1.getLeftX()
+        # else:
+        #     tspeed = 0
 
-        if xspeed == 0 and yspeed == 0 and tspeed == 0:  # if no speed is given to the motors there will be no power in any of the motors
-            self.drivetrain.fld.set(0)
-            self.drivetrain.brd.set(0)
-            self.drivetrain.bld.set(0)
-            self.drivetrain.frd.set(0)
-
-            self.drivetrain.blr.set(0)
-            self.drivetrain.brr.set(0)
-            self.drivetrain.flr.set(0)
-            self.drivetrain.frr.set(0)
+        # if xspeed == 0 and yspeed == 0 and tspeed == 0:  # if no speed is given to the motors there will be no power in any of the motors
+        #     self.drivetrain.fld.set(0)
+        #     self.drivetrain.brd.set(0)
+        #     self.drivetrain.bld.set(0)
+        #     self.drivetrain.frd.set(0)
+        #
+        #     self.drivetrain.blr.set(0)
+        #     self.drivetrain.brr.set(0)
+        #     self.drivetrain.flr.set(0)
+        #     self.drivetrain.frr.set(0)
 
         speeds = ChassisSpeeds.fromRobotRelativeSpeeds(yspeed * self.slow, -xspeed * self.slow, -tspeed * 0.8,
                                                        Rotation2d().fromDegrees(
-                                                           self.yaw))
+                                                           self.drivetrain.getGyro()))
 
         self.drivetrain.driveFromChassisSpeeds(speeds)
 

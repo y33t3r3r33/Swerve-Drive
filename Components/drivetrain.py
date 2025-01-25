@@ -206,28 +206,28 @@ class Drivetrain():
 
    def driveFromChassisSpeeds(self, speeds: ChassisSpeeds) -> None:
       self.lastChassisSpeed = speeds
-      frontLeft, frontRight, backLeft, backRight = self.kinematics.toSwerveModuleStates(speeds)
+      fl, fr, bl, br = self.kinematics.toSwerveModuleStates(speeds)
 
-      frontLeftOptimized = SwerveModuleState.optimize(frontLeft,
+      frontLeftOptimized = SwerveModuleState.optimize(fl,
                                                       Rotation2d(
-                                                         ticks2rad(self.flenc.get_absolute_position()._value)))
-      frontRightOptimized = SwerveModuleState.optimize(frontRight,
+                                                         ticks2rad(self.flenc.get_absolute_position().value)))
+      frontRightOptimized = SwerveModuleState.optimize(fr,
                                                        Rotation2d(
-                                                          ticks2rad(self.Frenc.get_absolute_position()._value)))
-      backLeftOptimized = SwerveModuleState.optimize(backLeft,
+                                                          ticks2rad(self.frenc.get_absolute_position().value)))
+      backLeftOptimized = SwerveModuleState.optimize(bl,
                                                      Rotation2d(
-                                                        ticks2rad(self.blenc.get_absolute_position()._value)))
-      backRightOptimized = SwerveModuleState.optimize(backRight,
+                                                        ticks2rad(self.blenc.get_absolute_position().value)))
+      backRightOptimized = SwerveModuleState.optimize(br,
                                                       Rotation2d(
-                                                         ticks2rad(self.brenc.get_absolute_position()._value)))
+                                                         ticks2rad(self.brenc.get_absolute_position().value)))
 
-      self.blr.set(-self.blpid.calculate(self.blenc.get_absolute_position()._value,
+      self.blr.set(-self.blpid.calculate(self.blenc.get_absolute_position().value,
                                                          lrat(backLeftOptimized.angle.radians())))
-      self.flr.set(self.flpid.calculate(self.flenc.get_absolute_position()._value,
+      self.flr.set(self.flpid.calculate(self.flenc.get_absolute_position().value,
                                                          lrat(frontLeftOptimized.angle.radians())))
-      self.brr.set(-self.brpid.calculate(self.brenc.get_absolute_position()._value,
+      self.brr.set(-self.brpid.calculate(self.brenc.get_absolute_position().value,
                                                            lrat(backRightOptimized.angle.radians())))
-      self.frr.set(-self.frpid.calculate(self.frenc.get_absolute_position()._value,
+      self.frr.set(-self.frpid.calculate(self.frenc.get_absolute_position().value,
                                                             lrat(frontRightOptimized.angle.radians())))
 
       self.bld.set(-backLeftOptimized.speed)
