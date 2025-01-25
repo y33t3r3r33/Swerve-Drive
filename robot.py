@@ -46,36 +46,17 @@ class MyRobot(wpilib.TimedRobot):
         # self.drivetrain = self.robotcontainer.drivetrain
 
     def teleopInit(self):
-        self.slow = 0.05
+        self.slow = 1.5
 
     def teleopPeriodic(self):
         # self.robotcontainer = RobotContainer()
         
         xspeed = self.driver1.getRightX() * self.slow
         yspeed = self.driver1.getRightY() * self.slow
-        # tspeed = self.driver1.getRightX()
 
-        # if self.driver1.B():
-        #     self.drivetrain.gyro.zeroYaw()
-        # else:
-        #     tspeed = 0
+        rot_speed = self.driver1.getLeftX() * 2
 
-        # if self.driver1.A():
-        #     tspeed = self.driver1.getLeftX()
-        # else:
-        #     tspeed = 0
-
-        # if xspeed == 0 and yspeed == 0 and tspeed == 0:  # if no speed is given to the motors there will be no power in any of the motors
-        #     self.drivetrain.fld.set(0)
-        #     self.drivetrain.brd.set(0)
-        #     self.drivetrain.bld.set(0)
-        #     self.drivetrain.frd.set(0)
-        #
-        #     self.drivetrain.blr.set(0)
-        #     self.drivetrain.brr.set(0)
-        #     self.drivetrain.flr.set(0)
-        #     self.drivetrain.frr.set(0)
-
-        self.drivetrain.drive_from_vector_and_angle(xspeed, yspeed, 0)
-
+        self.drivetrain.drive_vector(xspeed, yspeed, rot_speed)
+        
+        self.drivetrain.update()
         # print(self.drivetrain.odometry.getPose())
