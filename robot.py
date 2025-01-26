@@ -9,6 +9,7 @@ from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Rotation2d
 
 import Components.drivetrain
+import Components.claw
 
 
 class State():
@@ -30,6 +31,7 @@ class MyRobot(wpilib.TimedRobot):
         self.driver1 = wpilib.XboxController(0)
         self.driver2 = wpilib.XboxController(1)
         self.drivetrain = Components.drivetrain.Drivetrain()
+        self.claw = Components.claw.Claw()
 
         self.state = State("disabled")
 
@@ -60,3 +62,8 @@ class MyRobot(wpilib.TimedRobot):
         
         self.drivetrain.update()
         # print(self.drivetrain.odometry.getPose())
+
+        if self.driver2.getLeftBumperButtonPressed() == True:
+            self.claw.ClawSetPower(0.3)
+        else:
+            self.claw.ClawSetPower(0)
