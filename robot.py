@@ -32,6 +32,7 @@ class MyRobot(wpilib.TimedRobot):
         self.driver2 = wpilib.XboxController(1)
         self.drivetrain = Components.drivetrain.Drivetrain()
         self.claw = Components.claw.Claw()
+        self.arm = Components.arm.Arm()
 
         self.state = State("disabled")
 
@@ -67,3 +68,7 @@ class MyRobot(wpilib.TimedRobot):
             self.claw.ClawSetPower(0.3)
         else:
             self.claw.ClawSetPower(0)
+
+        self.arm.ArmSwiv(self.driver2.RightX)
+
+        self.arm.ArmSwiv(self.driver2.RightY)
