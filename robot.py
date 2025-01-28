@@ -10,7 +10,7 @@ from wpimath.geometry import Rotation2d
 
 import Components.drivetrain
 import Components.claw
-
+import Components.arm
 
 class State():
     def __init__(self, state: str):
