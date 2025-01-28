@@ -4,7 +4,7 @@ class Arm():
 	def __init__(self):
 		self.armswiv1 = rev.SparkMax(16, rev.SparkMax.MotorType.kBrushed)
 		self.armswiv2 = rev.SparkMax(17, rev.Sparkmax.MotorType.kBrushed)
-		self.armextend = rev.SparkMax(18, rev.SparkMax.MotorTypr.kBrushed)
+		self.armextend = rev.SparkMax(18, rev.SparkMax.MotorType.kBrushed)
 
 	def ArmSwiv(self, power):
 		self.armswiv1.set(power)
