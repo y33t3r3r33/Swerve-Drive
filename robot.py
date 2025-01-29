@@ -69,6 +69,21 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.claw.ClawSetPower(0)
 
-        self.arm.ArmSwiv(self.driver2.RightX)
+        if self.driver2.getYButtonPressed() == True:
+            self.arm.ArmSwiv(0.3)
+        elif self.driver2.getXButtonPressed() == True:
+            self.arm.ArmSwiv(-0.3)
+        else:
+            self.arm.ArmSwiv(0)
 
-        self.arm.ArmSwiv(self.driver2.RightY)
+        if self.driver2.getAButtonPressed() == True:
+            self.arm.ArmExtend(0.3)
+        elif self.driver2.getbButtonPressed() == False:
+            self.arm.ArmExtend(-0.3)
+        else:
+            self.arm.ArmExtend(0)
+
+
+        # self.arm.ArmSwiv(self.driver2.RightX)
+        #
+        # self.arm.ArmSwiv(self.driver2.RightY)
