@@ -11,7 +11,8 @@ from wpimath.geometry import Rotation2d
 import Components.drivetrain
 import Components.claw
 import Components.arm
-
+import Components.elevator
+import Components.limit
 class State():
     def __init__(self, state: str):
         self.state = state
@@ -33,7 +34,8 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain = Components.drivetrain.Drivetrain()
         self.claw = Components.claw.Claw()
         self.arm = Components.arm.Arm()
-
+        self.elevator = Components.elevator.Elevator()
+        self.limit = Components.limit.Limit()
         self.state = State("disabled")
 
         self.xsl = wpimath.filter.SlewRateLimiter(3)  # x speed limiter
@@ -69,21 +71,37 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.claw.ClawSetPower(0)
 
-        if self.driver2.getYButtonPressed():
-            self.arm.ArmSwiv(0.3)
-        elif self.driver2.getXButtonPressed():
-            self.arm.ArmSwiv(-0.3)
+#        if self.driver2.getYButtonPressed():
+#            self.arm.ArmSwiv(0.3)
+#        elif self.driver2.getXButtonPressed():
+#            self.arm.ArmSwiv(-0.3)
+#        else:
+#            self.arm.ArmSwiv(0)
+#
+#        if self.driver2.getAButtonPressed():
+#            self.arm.ArmExtend(0.3)
+#        elif self.driver2.getBButtonPressed():
+#            self.arm.ArmExtend(-0.3)
+#        else:
+#            self.arm.ArmExtend(0)
+
+        if self.driver2.getRightBumperButtonPressed():
+            self.elevator.EleExtend(0.3)
         else:
-            self.arm.ArmSwiv(0)
+            self.elevator.EleExtend(0)
 
         if self.driver2.getAButtonPressed():
-            self.arm.ArmExtend(0.3)
-        elif self.driver2.getBButtonPressed():
-            self.arm.ArmExtend(-0.3)
-        else:
-            self.arm.ArmExtend(0)
+            while self.getLimit2 == False:
+                self.EleExtend(0.3)
 
+        if self.driver2.getBButtonPressed():
+            while self.getLimit3 == False:
+                self.EleExtend(0.3)
 
-        # self.arm.ArmSwiv(self.driver2.RightX)
-        #
-        # self.arm.ArmSwiv(self.driver2.RightY)
+        if self.driver2.getXButtonPressed():
+            while self.getLimit4 == False:
+                self.EleExtend(0.3)
+ 
+        if self.driver2.getYButtonPressed():
+            while self.getLimit1 == False:
+                self.EleExtend(-0.3)
