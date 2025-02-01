@@ -93,15 +93,23 @@ class MyRobot(wpilib.TimedRobot):
         if self.driver2.getAButtonPressed():
             while self.getLimit2 == False:
                 self.EleExtend(0.3)
+            while self.getLimit2 == True:
+                self.EleExtend(0)
 
         if self.driver2.getBButtonPressed():
             while self.getLimit3 == False:
                 self.EleExtend(0.3)
+            while self.getLimit3 == True:
+                self.EleExtend(0)
 
         if self.driver2.getXButtonPressed():
             while self.getLimit4 == False:
                 self.EleExtend(0.3)
+            while self.getLimit4 == True:
+                self.EleExtend(0)
  
         if self.driver2.getYButtonPressed():
             while self.getLimit1 == False:
                 self.EleExtend(-0.3)
+            while self.getLimit1 == True:
+                self.EleExtend(0)
