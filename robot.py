@@ -61,9 +61,9 @@ class MyRobot(wpilib.TimedRobot):
 
         rot_speed = self.driver1.getLeftX() * 2
 
-        self.drivetrain.drive_vector(xspeed, yspeed, rot_speed)
+        #self.drivetrain.drive_vector(xspeed, yspeed, rot_speed)
         
-        self.drivetrain.update()
+        #self.drivetrain.update()
         # print(self.drivetrain.odometry.getPose())
 
         if self.driver2.getLeftBumperButtonPressed():
@@ -85,31 +85,16 @@ class MyRobot(wpilib.TimedRobot):
 #        else:
 #            self.arm.ArmExtend(0)
 
-        if self.driver2.getRightBumperButtonPressed():
-            self.elevator.EleExtend(0.3)
-        else:
-            self.elevator.EleExtend(0)
+        if self.driver2.getAButton() and self.limit.getLimit2() == True:
+            self.elevator.EleExtend(1)
 
-        if self.driver2.getAButtonPressed():
-            while self.getLimit2 == False:
-                self.EleExtend(0.3)
-            while self.getLimit2 == True:
-                self.EleExtend(0)
+        if self.driver2.getBButton() and self.limit.getLimit3() == True:
+            self.elevator.EleExtend(1)
 
-        if self.driver2.getBButtonPressed():
-            while self.getLimit3 == False:
-                self.EleExtend(0.3)
-            while self.getLimit3 == True:
-                self.EleExtend(0)
-
-        if self.driver2.getXButtonPressed():
-            while self.getLimit4 == False:
-                self.EleExtend(0.3)
-            while self.getLimit4 == True:
-                self.EleExtend(0)
+        if self.driver2.getXButton() and self.limit.getLimit3() == True:
+            self.elevator.EleExtend(1)
  
-        if self.driver2.getYButtonPressed():
-            while self.getLimit1 == False:
-                self.EleExtend(-0.3)
-            while self.getLimit1 == True:
-                self.EleExtend(0)
+        if self.driver2.getYButton() and self.limit.getLimit1() == True:
+            self.elevator.EleExtend(-1)
+       
+        self.claw.WristMove(self.driver2.getRightX() * 0.5)
