@@ -1,3 +1,5 @@
+import math
+
 import wpilib
 import wpimath
 import wpilib.drive
@@ -37,26 +39,56 @@ class MyRobot(wpilib.TimedRobot):
         self.ysl = wpimath.filter.SlewRateLimiter(3)  # y rate limiter
         self.rl = wpimath.filter.SlewRateLimiter(3)  # rot limiter
 
-    def disable(self):
-        pass
+        self.position_test = False
+
+        self.rotation_track_test = Rotation2d(1, 0)
+
+    def disabledInit(self):
+        self.drivetrain.disable()
+
+    def disabledExit(self):
+        self.drivetrain.reset()
+        self.drivetrain.enable()
 
     def robot(self):
         pass
         # self.robotcontainer = RobotContainer()
         # self.drivetrain = self.robotcontainer.drivetrain
 
+    def robotPeriodic(self):
+        self.drivetrain.update()
+
     def teleopInit(self):
-        self.slow = 1.5
+        self.slow = 4
 
     def teleopPeriodic(self):
         # self.robotcontainer = RobotContainer()
+
+        if self.driver1.getAButtonPressed():
+            self.position_test = True
+            self.rotation_track_test = Rotation2d(1, 0)
+        if self.driver1.getBButtonPressed():
+            self.position_test = False
+
+        if self.driver1.getYButtonPressed():
+            # self.drivetrain.set_wheel_angles(Rotation2d(1, 0))
+            self.drivetrain.reset()
+            return
         
         xspeed = self.driver1.getRightX() * self.slow
         yspeed = self.driver1.getRightY() * self.slow
 
-        rot_speed = self.driver1.getLeftX() * 2
+        # print(xspeed)
+        # print(yspeed)
 
-        self.drivetrain.drive_vector(xspeed, yspeed, rot_speed)
-        
-        self.drivetrain.update()
+        rot_speed = self.driver1.getLeftX() * math.pi
+
+        if self.position_test:
+            if self.driver1.getXButton():
+                self.drivetrain.drive_vector_position(1, 0, Rotation2d(0, 1))
+            else:
+                self.drivetrain.drive_vector_position(0, 0, Rotation2d(1, 0))
+        else:
+            self.drivetrain.drive_vector_velocity(-yspeed, -xspeed, -rot_speed)
+
         # print(self.drivetrain.odometry.getPose())
