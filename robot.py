@@ -11,7 +11,7 @@ from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Rotation2d
 
 import Components.drivetrain
-
+import Components.vision
 
 class State():
     def __init__(self, state: str):
@@ -41,14 +41,50 @@ class MyRobot(wpilib.TimedRobot):
 
         self.position_test = False
 
+        self.repositioning = False
+
+        self.field_relative_drive = True
+
         self.rotation_track_test = Rotation2d(1, 0)
 
+        self.autonomous_state = 0
+        self.autonomous_in_flight = False  # Make sure we don't accidentally stage immediately after startup
+        self.autonomous_coords = [(-4, -1, Rotation2d(-1, 0)),
+                                  (-4,  2, Rotation2d(-1, 0)),
+                                  (-2,  2, Rotation2d(-1, 0))]
+        print(self.autonomous_coords)
+
+        self.vision = Components.vision.Vision()
+
     def disabledInit(self):
+        self.drivetrain.stop()
         self.drivetrain.disable()
 
     def disabledExit(self):
         self.drivetrain.reset()
         self.drivetrain.enable()
+
+    def autonomousInit(self):
+        self.drivetrain.set_robot_location(-2, -1, Rotation2d(-1, 0))
+        self.autonomous_state = 0
+
+    def autonomousPeriodic(self):
+        # Make sure we hit the target coordinate
+        if self.autonomous_in_flight and not self.drivetrain.arrived_at_target():
+            return
+
+        if self.autonomous_state >= len(self.autonomous_coords):
+            self.drivetrain.stop()
+            if self.autonomous_in_flight:
+                print("Done")
+            self.autonomous_in_flight = False
+            return
+
+        self.autonomous_in_flight = True
+        xpos, ypos, heading = self.autonomous_coords[self.autonomous_state]
+        self.drivetrain.drive_vector_position(xpos, ypos, heading)
+        print(f"Running stage {self.autonomous_state}...")
+        self.autonomous_state += 1
 
     def robot(self):
         pass
@@ -56,25 +92,37 @@ class MyRobot(wpilib.TimedRobot):
         # self.drivetrain = self.robotcontainer.drivetrain
 
     def robotPeriodic(self):
+        self.vision.poll()
         self.drivetrain.update()
 
     def teleopInit(self):
         self.slow = 4
+        # self.drivetrain.set_robot_location(-3, 0, Rotation2d(-1, 0))
 
     def teleopPeriodic(self):
         # self.robotcontainer = RobotContainer()
 
+        if self.repositioning and self.drivetrain.arrived_at_target():
+            self.repositioning = False
+            self.position_test = False
+            print("We've arrived!")
+        
         if self.driver1.getAButtonPressed():
             self.position_test = True
             self.rotation_track_test = Rotation2d(1, 0)
         if self.driver1.getBButtonPressed():
             self.position_test = False
+            self.repositioning = False
 
         if self.driver1.getYButtonPressed():
             # self.drivetrain.set_wheel_angles(Rotation2d(1, 0))
             self.drivetrain.reset()
             return
-        
+
+        if self.driver1.getXButton():
+            self.drivetrain.stop()
+            return
+
         xspeed = self.driver1.getRightX() * self.slow
         yspeed = self.driver1.getRightY() * self.slow
 
@@ -83,12 +131,16 @@ class MyRobot(wpilib.TimedRobot):
 
         rot_speed = self.driver1.getLeftX() * math.pi
 
+        
         if self.position_test:
-            if self.driver1.getXButton():
-                self.drivetrain.drive_vector_position(1, 0, Rotation2d(0, 1))
-            else:
+            # print(self.drivetrain.odometry.getPose())
+            if not self.repositioning:
                 self.drivetrain.drive_vector_position(0, 0, Rotation2d(1, 0))
+                self.repositioning = True
         else:
-            self.drivetrain.drive_vector_velocity(-yspeed, -xspeed, -rot_speed)
+            if self.field_relative_drive:
+                self.drivetrain.drive_vector_velocity_field_relative(-yspeed, -xspeed, -rot_speed)
+            else:
+                self.drivetrain.drive_vector_velocity(-yspeed, -xspeed, -rot_speed)
 
         # print(self.drivetrain.odometry.getPose())
