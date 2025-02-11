@@ -12,7 +12,6 @@ import Components.drivetrain
 import Components.claw
 import Components.arm
 import Components.elevator
-import Components.limit
 class State():
     def __init__(self, state: str):
         self.state = state
@@ -35,7 +34,6 @@ class MyRobot(wpilib.TimedRobot):
         self.claw = Components.claw.Claw()
         self.arm = Components.arm.Arm()
         self.elevator = Components.elevator.Elevator()
-        self.limit = Components.limit.Limit()
         self.state = State("disabled")
 
         self.xsl = wpimath.filter.SlewRateLimiter(3)  # x speed limiter
@@ -67,7 +65,7 @@ class MyRobot(wpilib.TimedRobot):
         # print(self.drivetrain.odometry.getPose())
 
         if self.driver2.getLeftBumperButtonPressed():
-            self.claw.ClawSetPower(0.3)
+            self.claw.ClawSetPower(1)
         else:
             self.claw.ClawSetPower(0)
 
@@ -85,16 +83,16 @@ class MyRobot(wpilib.TimedRobot):
 #        else:
 #            self.arm.ArmExtend(0)
 
-        if self.driver2.getAButton() and self.limit.getLimit2() == True:
-            self.elevator.EleExtend(1)
-
-        if self.driver2.getBButton() and self.limit.getLimit3() == True:
-            self.elevator.EleExtend(1)
-
-        if self.driver2.getXButton() and self.limit.getLimit3() == True:
-            self.elevator.EleExtend(1)
- 
-        if self.driver2.getYButton() and self.limit.getLimit1() == True:
-            self.elevator.EleExtend(-1)
+        # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
+        #     self.elevator.EleExtend(1)
+        #
+        # if self.driver2.getBButton() and self.elevator.getLimit3() == True:
+        #     self.elevator.EleExtend(1)
+        #
+        # if self.driver2.getXButton() and self.elevator.getLimit3() == True:
+        #     self.elevator.EleExtend(1)
+        #
+        # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
+        #     self.elevator.EleExtend(-1)
        
-        self.claw.WristMove(self.driver2.getRightX() * 0.5)
+        self.claw.WristMove(self.driver2.getRightX() * 0.2)
