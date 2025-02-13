@@ -50,6 +50,11 @@ class MyRobot(wpilib.TimedRobot):
         # self.robotcontainer = RobotContainer()
         # self.drivetrain = self.robotcontainer.drivetrain
 
+    def robotPeriodic(self):
+        self.claw.Update()
+        self.arm.Update()
+        self.elevator.Update()
+
     def teleopInit(self):
         self.slow = 1.5
 
