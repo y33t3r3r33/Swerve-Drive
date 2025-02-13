@@ -12,6 +12,9 @@ from wpimath.geometry import Rotation2d
 
 import Components.drivetrain
 import Components.vision
+import Components.claw
+import Components.arm
+import Components.elevator
 
 class State():
     def __init__(self, state: str):
@@ -32,6 +35,9 @@ class MyRobot(wpilib.TimedRobot):
         self.driver1 = wpilib.XboxController(0)
         self.driver2 = wpilib.XboxController(1)
         self.drivetrain = Components.drivetrain.Drivetrain()
+        self.claw = Components.claw.Claw()
+        self.arm = Components.arm.Arm()
+        self.elevator = Components.elevator.Elevator()
 
         self.state = State("disabled")
 
@@ -59,6 +65,9 @@ class MyRobot(wpilib.TimedRobot):
     def disabledInit(self):
         self.drivetrain.stop()
         self.drivetrain.disable()
+        self.claw.Disable()
+        self.elevator.Disable()
+        self.arm.Disable()
 
     def disabledExit(self):
         self.drivetrain.reset()
@@ -94,6 +103,9 @@ class MyRobot(wpilib.TimedRobot):
     def robotPeriodic(self):
         self.vision.poll()
         self.drivetrain.update()
+        self.arm.Update()
+        self.claw.Update()
+        self.elevator.Update()
 
     def teleopInit(self):
         self.slow = 4
@@ -144,3 +156,43 @@ class MyRobot(wpilib.TimedRobot):
                 self.drivetrain.drive_vector_velocity(-yspeed, -xspeed, -rot_speed)
 
         # print(self.drivetrain.odometry.getPose())
+
+        if self.driver2.getLeftBumperButton():
+            self.claw.ClawSetPower(1)
+        elif self.driver2.getRightBumperButton():
+            self.claw.ClawSetPower(-1)
+        else:
+            self.claw.ClawSetPower(0)
+
+            #        if self.driver2.getYButtonPressed():
+            #            self.arm.ArmSwiv(0.3)
+            #        elif self.driver2.getXButtonPressed():
+            #            self.arm.ArmSwiv(-0.3)
+            #        else:
+            #            self.arm.ArmSwiv(0)
+            #
+            #        if self.driver2.getAButtonPressed():
+            #            self.arm.ArmExtend(0.3)
+            #        elif self.driver2.getBButtonPressed():
+            #            self.arm.ArmExtend(-0.3)
+            #        else:
+            #            self.arm.ArmExtend(0)
+
+            # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
+            #     self.elevator.EleExtend(1)
+            #
+            # if self.driver2.getBButton() and self.elevator.getLimit3() == True:
+            #     self.elevator.EleExtend(1)
+            #
+            # if self.driver2.getXButton() and self.elevator.getLimit3() == True:
+            #     self.elevator.EleExtend(1)
+            #
+            # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
+            #     self.elevator.EleExtend(-1)
+
+        self.claw.WristMove(self.driver2.getRightX() * 0.2)
+
+        if self.driver2.getRightStickButton():
+            print(self.claw.Update())
+            print(self.arm.Update())
+            print(self.elevator.Update())
