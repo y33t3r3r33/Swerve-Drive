@@ -31,3 +31,6 @@ class Elevator():
 
     def Update(self):
         self.kracken.get_position()
+
+    def Stop(self):
+        self.kracken.disable()

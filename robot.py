@@ -66,8 +66,11 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain.stop()
         self.drivetrain.disable()
         self.claw.Disable()
+        self.claw.Stop()
         self.elevator.Disable()
+        self.elevator.Stop()
         self.arm.Disable()
+        self.arm.Stop()
 
     def disabledExit(self):
         self.drivetrain.reset()
@@ -164,31 +167,31 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.claw.ClawSetPower(0)
 
-            #        if self.driver2.getYButtonPressed():
-            #            self.arm.ArmSwiv(0.3)
-            #        elif self.driver2.getXButtonPressed():
-            #            self.arm.ArmSwiv(-0.3)
-            #        else:
-            #            self.arm.ArmSwiv(0)
-            #
-            #        if self.driver2.getAButtonPressed():
-            #            self.arm.ArmExtend(0.3)
-            #        elif self.driver2.getBButtonPressed():
-            #            self.arm.ArmExtend(-0.3)
-            #        else:
-            #            self.arm.ArmExtend(0)
+            if self.driver2.getYButtonPressed() and self.driver2.getRightStickButton():
+                self.arm.ArmSwiv(0.3)
+            elif self.driver2.getXButtonPressed() and self.driver2.getRightStickButton():
+                self.arm.ArmSwiv(-0.3)
+            else:
+                self.arm.ArmSwiv(0)
 
-            # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
-            #     self.elevator.EleExtend(1)
-            #
-            # if self.driver2.getBButton() and self.elevator.getLimit3() == True:
-            #     self.elevator.EleExtend(1)
-            #
-            # if self.driver2.getXButton() and self.elevator.getLimit3() == True:
-            #     self.elevator.EleExtend(1)
-            #
-            # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
-            #     self.elevator.EleExtend(-1)
+            if self.driver2.getAButtonPressed() and self.driver2.getRightStickButton():
+                self.arm.ArmExtend(0.3)
+            elif self.driver2.getBButtonPressed() and self.driver2.getRightStickButton():
+                self.arm.ArmExtend(-0.3)
+            else:
+                self.arm.ArmExtend(0)
+
+            if self.driver2.getAButton() and self.elevator.getLimit2() == True:
+                self.elevator.EleExtend(1)
+
+            if self.driver2.getBButton() and self.elevator.getLimit3() == True:
+                self.elevator.EleExtend(1)
+
+            if self.driver2.getXButton() and self.elevator.getLimit3() == True:
+               self.elevator.EleExtend(1)
+
+            if self.driver2.getYButton() and self.elevator.getLimit1() == True:
+               self.elevator.EleExtend(-1)
 
         self.claw.WristMove(self.driver2.getRightX() * 0.2)
 
@@ -196,3 +199,4 @@ class MyRobot(wpilib.TimedRobot):
             print(self.claw.Update())
             print(self.arm.Update())
             print(self.elevator.Update())
+            print(self.drivetrain.update())

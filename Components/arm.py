@@ -22,3 +22,8 @@ class Arm():
 		self.armswiv1.getEncoder()
 		self.armswiv2.getEncoder()
 		self.armextend.getEncoder()
+
+	def Stop(self):
+		self.armswiv1.set(0)
+		self.armswiv2.set(0)
+		self.armextend.set(0)

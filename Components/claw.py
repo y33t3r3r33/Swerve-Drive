@@ -22,3 +22,8 @@ class Claw():
         self.claw1.getEncoder()
         self.claw2.getEncoder()
         self.wrist.get_position()
+
+    def Stop(self):
+        self.claw1.set(0)
+        self.claw2.set(0)
+        self.wrist.set(0)
