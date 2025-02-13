@@ -35,6 +35,9 @@ class Vision:
 
         if parsed_result is not None:
             print("valid targets: ", parsed_result.validity, ", pipelineIndex: ", parsed_result.pipeline_id,", Targeting Latency: ", parsed_result.targeting_latency)
-            print(parsed_result)
+            bot_pose = parsed_result.botpose
+            if bot_pose is not None:
+                print(f"position from cam: {bot_pose[0]}, {bot_pose[1]}, {bot_pose[2]}")
+                print(f"rotation from cam: {bot_pose[3]}, {bot_pose[4]}, {bot_pose[5]}")
         else:
             print("no target")
