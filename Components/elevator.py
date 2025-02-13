@@ -25,3 +25,9 @@ class Elevator():
 
     def getLimit4(self):
         self.limit4.get()
+
+    def Disable(self):
+        self.kracken.disable()
+
+    def Update(self):
+        self.kracken.get_position()

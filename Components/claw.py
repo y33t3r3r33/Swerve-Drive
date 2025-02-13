@@ -12,3 +12,13 @@ class Claw():
 
     def WristMove(self, power):
         self.wrist.set(power)
+
+    def Disable(self):
+        self.claw1.disable()
+        self.claw2.disable()
+        self.wrist.disable()
+
+    def Update(self):
+        self.claw1.getEncoder()
+        self.claw2.getEncoder()
+        self.wrist.get_position()

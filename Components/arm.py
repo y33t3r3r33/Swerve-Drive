@@ -12,3 +12,13 @@ class Arm():
 
 	def ArmExtend(self, power):
 		self.armextend.set(power)
+
+	def Disable(self):
+		self.armswiv1.disable()
+		self.armswiv2.disable()
+		self.armextend.disable()
+
+	def Update(self):
+		self.armswiv1.getEncoder()
+		self.armswiv2.getEncoder()
+		self.armextend.getEncoder()

@@ -41,7 +41,9 @@ class MyRobot(wpilib.TimedRobot):
         self.rl = wpimath.filter.SlewRateLimiter(3)  # rot limiter
 
     def disable(self):
-        pass
+        self.claw.Disable()
+        self.arm.Disable()
+        self.elevator.Disable()
 
     def robot(self):
         pass
@@ -98,3 +100,8 @@ class MyRobot(wpilib.TimedRobot):
         #     self.elevator.EleExtend(-1)
        
         self.claw.WristMove(self.driver2.getRightX() * 0.2)
+
+        if self.driver2.getRightStickButton():
+            print(self.claw.Update())
+            print(self.arm.Update())
+            print(self.elevator.Update())
