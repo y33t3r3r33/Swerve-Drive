@@ -64,8 +64,10 @@ class MyRobot(wpilib.TimedRobot):
         #self.drivetrain.update()
         # print(self.drivetrain.odometry.getPose())
 
-        if self.driver2.getLeftBumperButtonPressed():
-            self.claw.ClawSetPower(0.3)
+        if self.driver2.getLeftBumperButton():
+            self.claw.ClawSetPower(1)
+        elif self.driver2.getRightBumperButton():
+            self.claw.ClawSetPower(-1)
         else:
             self.claw.ClawSetPower(0)
 
