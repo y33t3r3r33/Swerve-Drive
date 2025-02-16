@@ -194,10 +194,10 @@ class MyRobot(wpilib.TimedRobot):
             #    self.elevator.EleExtend(-1)
 
         POW = self.driver2.getRightY() * 0.2
-        if power < 0.2:
-            power += 0.05
+        if POW < 0.2:
+            POW += 0.05
         
-        self.claw.wrist.set(power)
+        self.claw.wrist.set(POW)
 
 
         if self.driver2.getRightStickButton():
