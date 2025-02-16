@@ -14,7 +14,7 @@ import Components.drivetrain
 import Components.vision
 import Components.claw
 import Components.arm
-import Components.elevator
+# import Components.elevator
 
 class State():
     def __init__(self, state: str):
@@ -37,7 +37,7 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain = Components.drivetrain.Drivetrain()
         self.claw = Components.claw.Claw()
         self.arm = Components.arm.Arm()
-        self.elevator = Components.elevator.Elevator()
+        # self.elevator = Components.elevator.Elevator()
 
         self.state = State("disabled")
 
@@ -67,8 +67,8 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain.disable()
         self.claw.Disable()
         self.claw.Stop()
-        self.elevator.Disable()
-        self.elevator.Stop()
+        # self.elevator.Disable()
+        # self.elevator.Stop()
         self.arm.Disable()
         self.arm.Stop()
 
@@ -108,7 +108,7 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain.update()
         self.arm.Update()
         self.claw.Update()
-        self.elevator.Update()
+        # self.elevator.Update()
 
     def teleopInit(self):
         self.slow = 4
@@ -181,22 +181,27 @@ class MyRobot(wpilib.TimedRobot):
             else:
                 self.arm.ArmExtend(0)
 
-            if self.driver2.getAButton() and self.elevator.getLimit2() == True:
-                self.elevator.EleExtend(1)
+            # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
+            #     self.elevator.EleExtend(1)
 
-            if self.driver2.getBButton() and self.elevator.getLimit3() == True:
-                self.elevator.EleExtend(1)
+            # if self.driver2.getBButton() and self.elevator.getLimit3() == True:
+            #     self.elevator.EleExtend(1)
 
-            if self.driver2.getXButton() and self.elevator.getLimit3() == True:
-               self.elevator.EleExtend(1)
+            # if self.driver2.getXButton() and self.elevator.getLimit3() == True:
+            #    self.elevator.EleExtend(1)
 
-            if self.driver2.getYButton() and self.elevator.getLimit1() == True:
-               self.elevator.EleExtend(-1)
+            # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
+            #    self.elevator.EleExtend(-1)
 
-        self.claw.WristMove(self.driver2.getRightX() * 0.2)
+        POW = self.driver2.getRightY() * 0.2
+        if power < 0.2:
+            power += 0.05
+        
+        self.claw.wrist.set(power)
+
 
         if self.driver2.getRightStickButton():
             print(self.claw.Update())
             print(self.arm.Update())
-            print(self.elevator.Update())
+            # print(self.elevator.Update())
             print(self.drivetrain.update())
