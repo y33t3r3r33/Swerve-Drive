@@ -194,8 +194,11 @@ class MyRobot(wpilib.TimedRobot):
             #    self.elevator.EleExtend(-1)
 
         POW = self.driver2.getRightY() * 0.2
+        
         if POW < 0.2:
             POW += 0.05
+            print(self.claw.wrist.getPose)
+            
         
         self.claw.wrist.set(POW)
 
