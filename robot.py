@@ -5,6 +5,7 @@ import wpimath
 import wpilib.drive
 import wpimath.filter
 import wpimath.controller
+from robotcontainer import RobotContainer
 
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.geometry import Rotation2d
@@ -18,17 +19,31 @@ global hasModes
 global funnyMode
 global modeBUTN
 
+class State():
+
+    def __init__(self, state: str):
+        self.state = state
+        pass
+
+    def changeState(self, state: str):
+        self.state = state
+
+    def getState(self):
+        return self.state
 
 class MyRobot(wpilib.TimedRobot):
 
     def robotInit(self) -> None:
         super().__init__()
+        self.robotcontainer = RobotContainer()
         self.driver1 = wpilib.XboxController(0)
         self.driver2 = wpilib.XboxController(1)
         self.drivetrain = Components.drivetrain.Drivetrain()
         self.claw = Components.claw.Claw()
         self.arm = Components.arm.Arm()
         # self.elevator = Components.elevator.Elevator()
+
+        self.state = State("disabled")
 
         self.xsl = wpimath.filter.SlewRateLimiter(3)  # x speed limiter
         self.ysl = wpimath.filter.SlewRateLimiter(3)  # y rate limiter
@@ -70,7 +85,6 @@ class MyRobot(wpilib.TimedRobot):
         self.autonomous_state = 0
 
     def autonomousPeriodic(self):
-        return
         # Make sure we hit the target coordinate
         if self.autonomous_in_flight and not self.drivetrain.arrived_at_target():
             return
@@ -94,11 +108,10 @@ class MyRobot(wpilib.TimedRobot):
         # self.drivetrain = self.robotcontainer.drivetrain
 
     def robotPeriodic(self):
-        return
-        self.vision.poll()
+        # self.vision.poll()
         self.drivetrain.update()
-        # self.arm.Update()
-        # self.claw.Update()
+        self.arm.Update()
+        self.claw.Update()
         # self.elevator.Update()
 
     def teleopInit(self):
@@ -106,14 +119,14 @@ class MyRobot(wpilib.TimedRobot):
         # self.drivetrain.set_robot_location(-3, 0, Rotation2d(-1, 0))
 
     def teleopPeriodic(self):
-        return
         # self.robotcontainer = RobotContainer()
+
 
         if self.repositioning and self.drivetrain.arrived_at_target():
             self.repositioning = False
             self.position_test = False
             print("We've arrived!")
-
+        
         if self.driver1.getAButtonPressed():
             self.position_test = True
             self.rotation_track_test = Rotation2d(1, 0)
@@ -124,6 +137,7 @@ class MyRobot(wpilib.TimedRobot):
         if self.driver1.getYButtonPressed():
             # self.drivetrain.set_wheel_angles(Rotation2d(1, 0))
             self.drivetrain.reset()
+            return
 
         if self.driver1.getXButton():
             self.drivetrain.stop()
@@ -147,6 +161,7 @@ class MyRobot(wpilib.TimedRobot):
 
         rot_speed = self.driver1.getLeftX() * math.pi
 
+        
         if self.position_test:
             # print(self.drivetrain.odometry.getPose())
             if not self.repositioning:
@@ -159,3 +174,56 @@ class MyRobot(wpilib.TimedRobot):
                 self.drivetrain.drive_vector_velocity(-yspeed, -xspeed, -rot_speed)
 
         # print(self.drivetrain.odometry.getPose())
+
+        if funnyMode == "CLAW":
+            # mode_LISTENERS
+            if modeBUTN == 0:
+                funnyMode = "CLAW"
+            if modeBUTN == 180:
+                funnyMode = "Swag"
+            if self.driver2.getLeftBumperButton():
+                self.claw.ClawSetPower(0.5)
+
+            else:
+                funnyMode = "Swag"
+                self.claw.ClawSetPower(-0.3)
+
+
+        if self.driver2.getYButtonPressed() and self.driver2.getRightStickButton():
+            self.arm.ArmSwiv(0.3)
+        elif self.driver2.getXButtonPressed() and self.driver2.getRightStickButton():
+            self.arm.ArmSwiv(-0.3)
+        else:
+            self.arm.ArmSwiv(0)
+
+        if self.driver2.getAButtonPressed() and self.driver2.getRightStickButton():
+            self.arm.ArmExtend(0.3)
+        elif self.driver2.getBButtonPressed() and self.driver2.getRightStickButton():
+               self.arm.ArmExtend(-0.3)
+        else:
+            self.arm.ArmExtend(0)
+
+            # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
+            #     self.elevator.EleExtend(1)
+
+            # if self.driver2.getBButton() and self.elevator.getLimit3() == True:
+            #     self.elevator.EleExtend(1)
+
+            # if self.driver2.getXButton() and self.elevator.getLimit3() == True:
+            #    self.elevator.EleExtend(1)
+
+            # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
+            #    self.elevator.EleExtend(-1)
+
+        # mode_SIGMACLAW
+        if funnyMode == "CLAW":
+            POW = self.driver2.getRightY() * 0.2
+            if POW < 0.2:
+                self.claw.HoldPOS()
+            self.claw.WristMove(POW)
+
+        if self.driver2.getLeftStickButton():
+            print(self.claw.Update())
+            print(self.arm.Update())
+            # print(self.elevator.Update())
+            print(self.drivetrain.update())

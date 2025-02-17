@@ -3,10 +3,6 @@
 # on your RoboRIO
 #
 
-[tool.robotpy.pyfrc]
-
-isolated = true
-
 [tool.robotpy]
 
 # Version of robotpy this project depends on
@@ -33,6 +29,5 @@ robotpy_extras = [
 
 # Other pip packages to install
 requires = [
-	 "limelightlib-python",
-	 "pyfrc"
+	 "limelightlib-python"
 ]
