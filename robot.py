@@ -159,7 +159,7 @@ class MyRobot(wpilib.TimedRobot):
         # print(xspeed)
         # print(yspeed)
 
-        rot_speed = self.driver1.getLeftX() * math.piw
+        rot_speed = self.driver1.getLeftX() * math.pi
 
         
         if self.position_test:
