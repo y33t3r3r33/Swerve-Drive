@@ -45,7 +45,8 @@ class Vision:
         if parsed_results is not None:
             fiducial_results = parsed_results.fiducialResults
             for i in fiducial_results:
-                print(i)
+                print("target: ", i.robot_pose_target_space)
+                print("field: ", i.robot_pose_field_space)
         
         
         # parsed_result = limelightresults.parse_results(result)
