@@ -1,11 +1,16 @@
 import phoenix6
 import rev
+from phoenix6.configs import FeedbackConfigs
+from phoenix5 import *
+
+
 
 class Claw():
     def __init__(self):
         self.claw1 = rev.SparkMax(14, rev.SparkMax.MotorType.kBrushless)
         self.claw2 = rev.SparkMax(15, rev.SparkMax.MotorType.kBrushless)
         self.wrist = phoenix6.hardware.TalonFX(21, "rio")
+
     def ClawSetPower(self, power):
         self.claw1.set(power)
         self.claw2.set(power)
@@ -27,3 +32,9 @@ class Claw():
         self.claw1.set(0)
         self.claw2.set(0)
         self.wrist.set(0)
+
+    def HoldPOS(self):
+
+        curPOS = self.wrist.get_position().value
+        print("HoldPOS: ", curPOS)
+        self.wrist.set(curPOS)

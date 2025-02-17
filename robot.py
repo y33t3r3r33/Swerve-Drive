@@ -15,8 +15,12 @@ import Components.vision
 import Components.claw
 import Components.arm
 # import Components.elevator
+global hasModes
+global funnyMode
+global modeBUTN
 
 class State():
+
     def __init__(self, state: str):
         self.state = state
         pass
@@ -117,6 +121,7 @@ class MyRobot(wpilib.TimedRobot):
     def teleopPeriodic(self):
         # self.robotcontainer = RobotContainer()
 
+
         if self.repositioning and self.drivetrain.arrived_at_target():
             self.repositioning = False
             self.position_test = False
@@ -141,10 +146,20 @@ class MyRobot(wpilib.TimedRobot):
         xspeed = self.driver1.getRightX() * self.slow
         yspeed = self.driver1.getRightY() * self.slow
 
+        hasModes = True
+        funnyMode = "CLAW"
+        modeBUTN = self.driver2.getPOV()
+
+        # mode_LISTENERS
+        if modeBUTN == 0:
+            funnyMode = "CLAW"
+        elif modeBUTN == 180:
+            funnyMode = "Swag"
+
         # print(xspeed)
         # print(yspeed)
 
-        rot_speed = self.driver1.getLeftX() * math.pi
+        rot_speed = self.driver1.getLeftX() * math.piw
 
         
         if self.position_test:
@@ -160,26 +175,33 @@ class MyRobot(wpilib.TimedRobot):
 
         # print(self.drivetrain.odometry.getPose())
 
-        if self.driver2.getLeftBumperButton():
-            self.claw.ClawSetPower(1)
-        elif self.driver2.getRightBumperButton():
-            self.claw.ClawSetPower(-1)
+        if funnyMode == "CLAW":
+            # mode_LISTENERS
+            if modeBUTN == 0:
+                funnyMode = "CLAW"
+            if modeBUTN == 180:
+                funnyMode = "Swag"
+            if self.driver2.getLeftBumperButton():
+                self.claw.ClawSetPower(0.5)
+
+            else:
+                funnyMode = "Swag"
+                self.claw.ClawSetPower(-0.3)
+
+
+        if self.driver2.getYButtonPressed() and self.driver2.getRightStickButton():
+            self.arm.ArmSwiv(0.3)
+        elif self.driver2.getXButtonPressed() and self.driver2.getRightStickButton():
+            self.arm.ArmSwiv(-0.3)
         else:
-            self.claw.ClawSetPower(0)
+            self.arm.ArmSwiv(0)
 
-            if self.driver2.getYButtonPressed() and self.driver2.getRightStickButton():
-                self.arm.ArmSwiv(0.3)
-            elif self.driver2.getXButtonPressed() and self.driver2.getRightStickButton():
-                self.arm.ArmSwiv(-0.3)
-            else:
-                self.arm.ArmSwiv(0)
-
-            if self.driver2.getAButtonPressed() and self.driver2.getRightStickButton():
-                self.arm.ArmExtend(0.3)
-            elif self.driver2.getBButtonPressed() and self.driver2.getRightStickButton():
-                self.arm.ArmExtend(-0.3)
-            else:
-                self.arm.ArmExtend(0)
+        if self.driver2.getAButtonPressed() and self.driver2.getRightStickButton():
+            self.arm.ArmExtend(0.3)
+        elif self.driver2.getBButtonPressed() and self.driver2.getRightStickButton():
+               self.arm.ArmExtend(-0.3)
+        else:
+            self.arm.ArmExtend(0)
 
             # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
             #     self.elevator.EleExtend(1)
@@ -193,17 +215,14 @@ class MyRobot(wpilib.TimedRobot):
             # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
             #    self.elevator.EleExtend(-1)
 
-        POW = self.driver2.getRightY() * 0.2
-        
-        if POW < 0.2:
-            POW += 0.05
-            print(self.claw.wrist.getPose)
-            
-        
-        self.claw.wrist.set(POW)
+        # mode_SIGMACLAW
+        if funnyMode == "CLAW":
+            POW = self.driver2.getRightY() * 0.2
+            if POW < 0.2:
+                self.claw.HoldPOS()
+            self.claw.WristMove(POW)
 
-
-        if self.driver2.getRightStickButton():
+        if self.driver2.getLeftStickButton():
             print(self.claw.Update())
             print(self.arm.Update())
             # print(self.elevator.Update())
