@@ -92,7 +92,7 @@ class MyRobot(wpilib.TimedRobot):
         # self.drivetrain = self.robotcontainer.drivetrain
 
     def robotPeriodic(self):
-        self.vision.poll()
+        # self.vision.poll()
         self.drivetrain.update()
 
     def teleopInit(self):

@@ -18,6 +18,8 @@ class Vision:
         print("[Vision] discovered limelights:", self.discovered_limelights)
 
         self.ll = None
+
+        self.cycle = 0
         
         if self.discovered_limelights:
             self.limelight_address = self.discovered_limelights[0]
@@ -28,16 +30,31 @@ class Vision:
     def poll(self):
         if not self.good:
             return
-        
-        result = self.ll.get_latest_results()
-        
-        parsed_result = limelightresults.parse_results(result)
 
-        if parsed_result is not None:
-            print("valid targets: ", parsed_result.validity, ", pipelineIndex: ", parsed_result.pipeline_id,", Targeting Latency: ", parsed_result.targeting_latency)
-            bot_pose = parsed_result.botpose
-            if bot_pose is not None:
-                print(f"position from cam: {bot_pose[0]}, {bot_pose[1]}, {bot_pose[2]}")
-                print(f"rotation from cam: {bot_pose[3]}, {bot_pose[4]}, {bot_pose[5]}")
-        else:
-            print("no target")
+        # self.cycle += 1
+        
+        # if self.cycle < 10:
+            # return
+
+        # self.cycle = 0
+
+        results = self.ll.get_latest_results()
+
+        parsed_results = limelightresults.parse_results(results)
+
+        if parsed_results is not None:
+            fiducial_results = parsed_results.fiducialResults
+            for i in fiducial_results:
+                print(i)
+        
+        
+        # parsed_result = limelightresults.parse_results(result)
+
+        # if parsed_result is not None:
+        #     print("valid targets: ", parsed_result.validity, ", pipelineIndex: ", parsed_result.pipeline_id,", Targeting Latency: ", parsed_result.targeting_latency)
+        #     bot_pose = parsed_result.botpose
+        #     if bot_pose is not None:
+        #         print(f"position from cam: {bot_pose[0]}, {bot_pose[1]}, {bot_pose[2]}")
+        #         print(f"rotation from cam: {bot_pose[3]}, {bot_pose[4]}, {bot_pose[5]}")
+        # else:
+        #     print("no target")
