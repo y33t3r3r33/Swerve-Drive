@@ -1,4 +1,5 @@
 import wpilib
+import wpiutil
 
 import limelight
 import limelightresults
@@ -6,26 +7,51 @@ import limelightresults
 import time
 import json
 
+import sys
+
 
 class Vision:
     """Main vision class, responsible for close-in navigation and global positioning with AprilTags"""
 
     def __init__(self):
 
+        print("\nVision.__init__ executed, initializing vision class...")
+        
         self.good = False
         self.discovered_limelights = limelight.discover_limelights(debug=True, timeout=1)
 
-        print("[Vision] discovered limelights:", self.discovered_limelights)
+        print("[Vision.__init__] discovered limelights:", self.discovered_limelights)
 
         self.ll = None
 
         self.cycle = 0
         
         if self.discovered_limelights:
+            print("[Vision.__init__] Limelights discovered, opening first one...")
             self.limelight_address = self.discovered_limelights[0]
             self.ll = limelight.Limelight(self.limelight_address)
+            timestamp = time.perf_counter_ns()
             self.ll.enable_websocket()
+            timestamp_end = time.perf_counter_ns()
+            timestamp_end -= timestamp
+            print(f"[Vision.__init__] Took {timestamp_end}ns to enable websocket")
+            print("[Vision.__init__] Flagging vision class as good, current limelight = " + self.limelight_address)
             self.good = True
+        else:
+            print("[Vision.__init__] No limelights found.")
+
+        print("Vision.__init__ completed.")
+
+    def __del__(self):
+        print("\nRunning Vision.__del__, destructing...")
+        if self.good:
+            self.good = False
+            print("[Vision.__del__] Vision flagged as good, closing...")
+            self.ll.disable_websocket()
+        else:
+            print("[Vision.__del__] Vision not flagged as good, nothing to do.")
+
+        print("Vision.__del__ completed.")
 
     def poll(self):
         if not self.good:
@@ -45,9 +71,8 @@ class Vision:
         if parsed_results is not None:
             fiducial_results = parsed_results.fiducialResults
             for i in fiducial_results:
-                print(i)
-        
-        
+                print(vars(i))
+
         # parsed_result = limelightresults.parse_results(result)
 
         # if parsed_result is not None:

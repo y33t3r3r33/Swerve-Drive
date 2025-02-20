@@ -12,7 +12,7 @@ from wpimath import controller
 from wpimath import trajectory
 from wpimath.geometry import Translation2d, Rotation2d, Pose2d
 from wpimath.kinematics import SwerveDrive4Kinematics, SwerveModuleState, ChassisSpeeds, SwerveDrive4Odometry, \
-   SwerveModulePosition
+    SwerveModulePosition
 
 from .swervemodule import SwerveModule
 
@@ -76,7 +76,7 @@ class Drivetrain():
         self.translation_pid_y.setTolerance(0.05)
         self.translation_pid_y.setIZone(0.5)
         self.translation_pid_y.setIntegratorRange(-0.5, 0.5)
-        
+
         self.rotation_pid_constraints = trajectory.TrapezoidProfile.Constraints(math.pi, math.tau)
         self.rotation_pid = wpimath.controller.ProfiledPIDController(4, 1, 0.2,
                                                                      self.rotation_pid_constraints)
@@ -95,7 +95,7 @@ class Drivetrain():
 
     def _update_position_mode(self):
         # print(f"target pose: {self.target_pose.X()}, {self.target_pose.Y()}, {self.target_pose.rotation()}")
-        
+
         x_vel = self.translation_pid_x.calculate(self.odometry.getPose().X(), self.target_pose.X(), self.translation_pid_constraints)
         if self.translation_pid_x.atGoal():
             x_vel = 0
@@ -115,7 +115,7 @@ class Drivetrain():
 
     def update(self):
         self.odometry.update(self.gyro.getRotation2d(), self.get_swerve_module_positions())
-        
+
         if self.current_mode == DrivetrainControlMode.STOP:
             self.front_left.stop()
             self.front_right.stop()
@@ -205,7 +205,7 @@ class Drivetrain():
     def reset_gyro(self):
         self.gyro.zeroYaw()
 
-    def reset_odometry(self, xpos: float=0, ypos: float=0, heading: Rotation2d=Rotation2d(1, 0)):
+    def reset_odometry(self, xpos: float = 0, ypos: float = 0, heading: Rotation2d = Rotation2d(1, 0)):
         self.front_left.reset_distance()
         self.front_right.reset_distance()
         self.back_left.reset_distance()
@@ -221,7 +221,7 @@ class Drivetrain():
         self.translation_pid_x.reset(self.odometry.getPose().X())
         self.translation_pid_y.reset(self.odometry.getPose().Y())
         self.rotation_pid.reset(self.get_yaw().radians())
-        
+
     def set_robot_location(self, xpos: float, ypos: float, heading: Rotation2d) -> None:
         self.reset_odometry(xpos, ypos, heading)
         self.reset_pids()
