@@ -14,7 +14,8 @@ import Components.drivetrain
 import Components.vision
 import Components.claw
 import Components.arm
-# import Components.elevator
+import Components.elevator
+import Components.lidar
 global hasModes
 global funnyMode
 global modeBUTN
@@ -41,7 +42,8 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain = Components.drivetrain.Drivetrain()
         self.claw = Components.claw.Claw()
         self.arm = Components.arm.Arm()
-        # self.elevator = Components.elevator.Elevator()
+        self.elevator = Components.elevator.Elevator()
+        self.lidar = Components.lidar.Lidar
 
         self.state = State("disabled")
 
@@ -71,8 +73,8 @@ class MyRobot(wpilib.TimedRobot):
         self.drivetrain.disable()
         self.claw.Disable()
         self.claw.Stop()
-        # self.elevator.Disable()
-        # self.elevator.Stop()
+        self.elevator.Disable()
+        self.elevator.Stop()
         self.arm.Disable()
         self.arm.Stop()
 
@@ -203,17 +205,19 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.arm.ArmExtend(0)
 
-            # if self.driver2.getAButton() and self.elevator.getLimit2() == True:
-            #     self.elevator.EleExtend(1)
+            if self.driver2.getAButton() and self.elevator.getLimit2() == True:
+                self.elevator.EleExtend(1)
 
-            # if self.driver2.getBButton() and self.elevator.getLimit3() == True:
-            #     self.elevator.EleExtend(1)
+            if self.driver2.getBButton() and self.elevator.getLimit3() == True:
+                self.elevator.EleExtend(1)
 
-            # if self.driver2.getXButton() and self.elevator.getLimit3() == True:
-            #    self.elevator.EleExtend(1)
+            if self.driver2.getXButton() and self.elevator.getLimit3() == True:
+                self.elevator.EleExtend(1)
 
-            # if self.driver2.getYButton() and self.elevator.getLimit1() == True:
-            #    self.elevator.EleExtend(-1)
+            if self.driver2.getYButton() and self.elevator.getLimit1() == True:
+                self.elevator.EleExtend(-1)
+
+                self.lidar.Scan()
 
         # mode_SIGMACLAW
         if funnyMode == "CLAW":
@@ -222,8 +226,10 @@ class MyRobot(wpilib.TimedRobot):
                 self.claw.HoldPOS()
             self.claw.WristMove(POW)
 
+        self.elevator.CoralEater(self.driver2.getLeftY)
+
         if self.driver2.getLeftStickButton():
             print(self.claw.Update())
             print(self.arm.Update())
-            # print(self.elevator.Update())
+            print(self.elevator.Update())
             print(self.drivetrain.update())
